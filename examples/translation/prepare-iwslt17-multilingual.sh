@@ -24,10 +24,7 @@ mkdir -p "$ORIG" "$DATA"
 TRAIN_MINLEN=1  # remove sentences with <1 BPE token
 TRAIN_MAXLEN=250  # remove sentences with >250 BPE tokens
 
-URLS=(
-    "https://wit3.fbk.eu/archive/2017-01-trnted/texts/de/en/de-en.tgz"
-    "https://wit3.fbk.eu/archive/2017-01-trnted/texts/fr/en/fr-en.tgz"
-)
+ROOT_ARCHIVE="2017-01-trnted.tgz"
 ARCHIVES=(
     "de-en.tgz"
     "fr-en.tgz"
@@ -38,22 +35,17 @@ VALID_SETS=(
 )
 
 # download and extract data
-for ((i=0;i<${#URLS[@]};++i)); do
-    ARCHIVE=$ORIG/${ARCHIVES[i]}
-    if [ -f "$ARCHIVE" ]; then
-        echo "$ARCHIVE already exists, skipping download"
-    else
-        URL=${URLS[i]}
-        wget -P "$ORIG" "$URL"
-        if [ -f "$ARCHIVE" ]; then
-            echo "$URL successfully downloaded."
-        else
-            echo "$URL not successfully downloaded."
-            exit 1
-        fi
-    fi
-    FILE=${ARCHIVE: -4}
-    if [ -e "$FILE" ]; then
+TPATH=$ORIG/$ROOT_ARCHIVE
+ROOT_FILE=$ORIG/2017-01-trnted
+if [ -d "$ROOT_FILE" ]; then
+    echo "$ROOT_FILE already exists, skipping extraction"
+else
+    tar -C "$ORIG" -xzvf "$TPATH"
+fi
+for ((i=0;i<${#ARCHIVES[@]};++i)); do
+    ARCHIVE=$ROOT_FILE/texts/${SRCS[i]}/$TGT/${ARCHIVES[i]}
+    FILE=$ORIG/${SRCS[i]}-$TGT
+    if [ -d "$FILE" ]; then
         echo "$FILE already exists, skipping extraction"
     else
         tar -C "$ORIG" -xzvf "$ARCHIVE"
